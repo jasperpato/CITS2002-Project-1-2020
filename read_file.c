@@ -1,6 +1,4 @@
-#ifndef SCHEDULE
 #include "schedule.h"
-#endif
 
 void print_event(event *event) {
   printf("%d %s", event->pid, actions[event->action]);

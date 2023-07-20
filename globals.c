@@ -1,5 +1,29 @@
 #include "schedule.h"
 
+char actions[][MAX_ARG_LENGTH] = {
+  "compute",
+  "sleep",
+  "pipe",
+  "fork",
+  "readpipe",
+  "writepipe",
+  "wait",
+  "exit",
+};
+
+int NUM_ACTIONS = sizeof actions / sizeof actions[0];
+
+char states[][MAX_ARG_LENGTH] = {
+  "Ready",
+  "Running",
+  "Sleeping",
+  "Waiting",
+  "Writing",
+  "Reading",
+};
+
+int NUM_STATES = sizeof states / sizeof states[0];
+
 process processes[MAX_PROCESSES];
 int num_processes = 0;
 

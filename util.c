@@ -1,6 +1,4 @@
-#ifndef SCHEDULE
 #include "schedule.h"
-#endif
 
 int min(int a, int b) {
   return a <= b ? a : b;
