@@ -1,4 +1,6 @@
+#ifndef SCHEDULE
 #include "schedule.h"
+#endif
 
 int is_empty() {
   return last == first;

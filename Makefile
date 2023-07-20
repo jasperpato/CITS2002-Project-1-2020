@@ -8,7 +8,7 @@ ODIR=obj
 DEPS = $(PROJECT).h
 
 ODIR=obj
-_OBJ = globals.o util.o read_file.o queue.o schedule.o
+_OBJ = util.o read_file.o queue.o schedule.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 

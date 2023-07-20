@@ -16,11 +16,29 @@
 #define DEF_TRANSFER_TIME 1
 #define DEF_TIME_QUANTUM 1000
 
-extern char actions[][MAX_ARG_LENGTH];
-extern int NUM_ACTIONS;
+char actions[][MAX_ARG_LENGTH] = {
+  "compute",
+  "sleep",
+  "pipe",
+  "fork",
+  "readpipe",
+  "writepipe",
+  "wait",
+  "exit",
+};
 
-extern char states[][MAX_ARG_LENGTH];
-extern int NUM_STATES;
+#define NUM_ACTIONS sizeof(actions) / sizeof(actions[0])
+
+char states[][MAX_ARG_LENGTH] = {
+  "Ready",
+  "Running",
+  "Sleeping",
+  "Waiting",
+  "Writing",
+  "Reading",
+};
+
+#define NUM_STATES sizeof(states) / sizeof(states[0])
 
 struct event {
   int pid;
@@ -41,45 +59,46 @@ struct process {
   int sleep_length;
 } typedef process;
 
-extern process processes[MAX_PROCESSES];
-extern int num_processes;
+process processes[MAX_PROCESSES];
+int num_processes;
 
-extern process *queue[MAX_PROCESSES];
-extern int first, last;
+process *queue[MAX_PROCESSES];
+int first= 0;
+int last = 0;
 
-extern int switch_state_time; // usecs
-extern int pipe_size; // bytes
-extern int transfer_time; // per byte
-extern int time_quantum; // usecs
+int switch_state_time = DEF_SWITCH_STATE_TIME; // usecs
+int pipe_size = DEF_PIPE_SIZE; // bytes
+int transfer_time = DEF_TRANSFER_TIME; // per byte
+int time_quantum = DEF_TIME_QUANTUM; // usecs
 
-extern int time;
+int time = 0;
 
 // read file
 
-extern int get_action(char *);
+int get_action(char *);
 
-extern void print_event(event *);
+void print_event(event *);
 
-extern void print_processes(void);
+void print_processes(void);
 
-extern void read_file(char *);
+void read_file(char *);
 
 // queue
 
-extern int is_empty(void);
+int is_empty(void);
 
-extern void enqueue(process *);
+void enqueue(process *);
 
-extern process *dequeue(void);
+process *dequeue(void);
 
-extern void test_queue(void);
+void test_queue(void);
 
 // util
 
-extern int min(int, int);
+int min(int, int);
 
-extern int max(int, int);
+int max(int, int);
 
-extern int get_action(char *);
+int get_action(char *);
 
-extern int get_state(char *);
+int get_state(char *);

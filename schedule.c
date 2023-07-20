@@ -1,4 +1,6 @@
+#ifndef SCHEDULE
 #include "schedule.h"
+#endif
 
 void update_sleepers(int elapsed) {
   for (int i = 0; i < num_processes; ++i) {
