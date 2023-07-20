@@ -1,0 +1,10 @@
+12 compute 100
+12 sleep 100
+18 compute 100
+18 sleep 100
+12 exit
+15 sleep 50
+18 sleep 50
+15 compute 50
+18 exit
+15 exit
