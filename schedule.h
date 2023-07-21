@@ -57,6 +57,17 @@ extern int time_quantum; // usecs
 
 extern int time;
 
+// schedule 
+
+extern void do_unblock(process **, int);
+extern void update_sleepers(int);
+extern void update_waiters(void);
+extern void change_state(process *, char *);
+extern void change_state_pid(int, char *);
+extern void increment_time(int);
+extern void schedule(void);
+
+
 // read file
 
 extern int get_action(char *);
@@ -68,13 +79,16 @@ extern void read_file(char *);
 
 extern int is_empty(void);
 extern void enqueue(process *);
+extern void enqueue_pid(int);
 extern process *dequeue(void);
+extern void print_queue(void);
 extern void test_queue(void);
 
 // blocked
 
 extern void block(process *);
-extern void unblock(process *);
+extern int unblock(process *);
+extern void print_blocked(void);
 extern void test_blocked(void);
 
 // util

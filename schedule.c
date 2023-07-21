@@ -1,12 +1,46 @@
 #include "schedule.h"
 
-void update_sleepers(int elapsed) {
-  for (int i = 0; i < num_processes; ++i) {
-    process *process = &processes[i];
-    if (process->state == get_state("Sleeping")) {
-      process->current_event->usecs -= elapsed;
+void do_unblock(process *to_unblock[], int num_unblock) {
+  for (int i = 0; i < num_unblock; ++i) {
+    process *process = to_unblock[i];
+    if (unblock(process)) {
+      change_state(process, "Ready");
+      ++process->current_event;
+      enqueue(process);
     }
   }
+}
+
+void update_sleepers(int elapsed) {
+  process *to_unblock[MAX_PROCESSES] = {};
+  int num_unblock = 0;
+  
+  for (int i = 0; i < num_blocked; ++i) {
+    process *process = blocked[i];
+    if (process->state == get_state("Sleeping")) {
+      process->current_event->usecs -= elapsed;
+      if (process->current_event->usecs <= 0) {
+        to_unblock[num_unblock++] = process;
+      }
+    }
+  }
+  do_unblock(to_unblock, num_unblock);
+}
+
+void update_waiters() {
+  process *to_unblock[MAX_PROCESSES] = {};
+  int num_unblock = 0;
+  for (int i = 0; i < num_blocked; ++i) {
+    process *process = blocked[i];
+      if (process->state == get_state("Waiting")) {
+        for (int j = 0; j < num_processes; ++j) {
+          if (processes[j].pid == process->current_event->other_pid && processes[j].terminated) {
+            to_unblock[num_unblock++] = process;
+          }
+        }
+      }
+  }
+  do_unblock(to_unblock, num_unblock);
 }
 
 void change_state(process *process, char *state) {
@@ -17,23 +51,31 @@ void change_state(process *process, char *state) {
   }
 }
 
+void change_state_pid(int pid, char *state) {
+  for (int i = 0; i < num_processes; ++i) {
+    if (processes[i].pid == pid) {
+      change_state(&processes[i], state);
+    }
+  }
+}
+
 void increment_time(int elapsed) {
   time += elapsed;
   update_sleepers(elapsed);
 }
 
 void schedule() {
-  int sleeper = -1;
+  while (!is_empty() || num_blocked) {
+  
+    if (is_empty()) {
+      increment_time(1);
+      continue;
+    }
 
-  while (!is_empty()) {
     process *process = dequeue();
     event *event = process->current_event;
-    print_event(event);
     
-    if (process->state == get_state("Ready")) {
-      // sleeper = -1;
-      change_state(process, "Running");
-    }
+    change_state(process, "Running");
 
     // ----- COMPUTE -----
     if (event->action == get_action("compute")) {
@@ -45,64 +87,39 @@ void schedule() {
       if (event->usecs <= 0) {
         ++process->current_event;
       }
-
-      //sleeper = -1;
       change_state(process, "Ready");
+      enqueue(process);
     }
 
     // ----- SLEEP -----
     else if (event->action == get_action("sleep")) {
-      // become the sleeper
-      if (sleeper == -1) {
-        sleeper = process->pid;
-      }
-      if (process->state != get_state("Sleeping")) {
-        change_state(process, "Sleeping");
-      }
-      // check if slept enough
-      else if (event->usecs <= 0) {
-        //sleeper = -1;
-        change_state(process, "Ready");
-        ++process->current_event;
-      }
-      else if (process->pid == sleeper) {
-        // got back to the sleeper without anything else happening
-        increment_time(1);
-      }
+      change_state(process, "Sleeping");
+      block(process);
     }
 
     // ----- FORK -----
     else if (event->action == get_action("fork")) {
-      //sleeper = -1;
+      // child
+      enqueue_pid(event->other_pid);
+      change_state_pid(event->other_pid, "Ready");
+
+      // parent
+      enqueue(process);
       change_state(process, "Ready");
-      change_state(NULL, "Ready"); // simulating changing child's state
+
       ++process->current_event;
     }
 
     // ----- WAIT -----
     else if (event->action == get_action("wait")) {
-      if (process->state == get_state("Running")) {
-        //sleeper = -1;
-        change_state(process, "Waiting");
-      }
-      else if (get_process(event->other_pid)->terminated) {
-        //sleeper = -1;
-        change_state(process, "Ready");
-        ++process->current_event;
-      } 
+      change_state(process, "Waiting");
+      block(process); 
     }
 
     // ----- EXIT -----
     if (event->action == get_action("exit")) {
       process->terminated = 1;
-    }
-    else {
-      enqueue(process);
-    }
-
-    if (process->state != get_state("Waiting") && process->state != get_state("Sleeping")) {
-      // reset sleeper
-      sleeper = -1;
+      update_waiters();
     }
   }
   printf("Time taken: %d usecs\n", time);

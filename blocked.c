@@ -4,7 +4,7 @@ void block(process *process) {
   blocked[num_blocked++] = process;
 }
 
-void unblock(process *process) {
+int unblock(process *process) {
   int shuffle = 0;
   for (int i = 0; i < num_blocked; ++i) {
     if (blocked[i] == process) {
@@ -14,7 +14,14 @@ void unblock(process *process) {
       blocked[i] = blocked[i+1];
     }
   }
-  --num_blocked;
+  if (shuffle) --num_blocked;
+  return shuffle;
+}
+
+void print_blocked() {
+  for (int i = 0; i < num_blocked; ++i) {
+    print_event(blocked[i]->current_event);
+  }
 }
 
 void test_blocked() {

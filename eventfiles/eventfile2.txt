@@ -1,6 +1,7 @@
-12 compute 100
-12 sleep 100
-18 compute 100
-18 sleep 100
-12 exit
-18 exit
+1 compute 100
+1 sleep 100
+1 fork 2
+2 compute 100
+2 sleep 100
+1 exit
+2 exit

@@ -17,6 +17,7 @@ $(ODIR)/%.o: %.c $(DEPS)
 
 $(PROJECT): $(OBJ)
 	$(C11) -o $@ $^ $(CFLAGS) $(LIBS)
+	# gcc -o $@ $^ $(CFLAGS) $(LIBS) -g -O0 -fsanitize=address # debug
 
 .PHONY: clean
 

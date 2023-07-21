@@ -1,11 +1,11 @@
-12 compute 2400
-12 sleep 5000
-12 pipe 4
-12 fork 18
-18 readpipe 4 400
-12 writepipe 4 1200
-18 readpipe 4 400
-12 wait 18
-18 readpipe 4 400
-18 exit
-12 exit
+1 compute 2400
+1 sleep 5000
+1 pipe 4
+1 fork 2
+2 readpipe 4 400
+1 writepipe 4 1200
+2 readpipe 4 400
+1 wait 18
+2 readpipe 4 400
+2 exit
+1 exit

@@ -86,7 +86,10 @@ void process_line(char *line) {
     process->state = get_state("Ready");
     process->current_event = &process->events[0];
 
-    enqueue(process);
+    // enqueue the first process
+    if (num_processes == 0) {
+      enqueue(process);
+    }
     ++num_processes;
   }
 

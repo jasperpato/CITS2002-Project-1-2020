@@ -1,3 +1,3 @@
-12 compute 2400
-12 sleep 5000
-12 exit
+1 compute 2400
+1 sleep 5000
+1 exit
