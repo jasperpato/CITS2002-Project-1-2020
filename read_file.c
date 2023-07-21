@@ -100,7 +100,9 @@ void read_file(char *fname) {
   FILE *f = fopen(fname, "r");
   char line[MAX_LINE_LENGTH];
   while(fgets(line, sizeof line, f) != NULL) {
-    process_line(line);
+    if (line[0] != '#') {
+      process_line(line);
+    }
   }
   fclose(f);
 }

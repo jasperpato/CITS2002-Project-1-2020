@@ -49,7 +49,7 @@ void change_state(process *process, char *state) {
   ++num_state_changes;
 
   print_event(process->current_event);
-  printf("(%d) %s->%s\n\n", num_state_changes, states[process->state], state);
+  printf("[%d] %s->%s (%d usecs)\n\n", num_state_changes, states[process->state], state, time);
   
   process->state = get_state(state);
 }

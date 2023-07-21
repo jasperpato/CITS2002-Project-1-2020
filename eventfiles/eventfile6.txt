@@ -1,0 +1,18 @@
+1 fork 2
+2 fork 3
+3 fork 4
+1 wait 2
+2 wait 3
+3 compute 2000
+3 wait 4
+4 sleep 500
+4 compute 5000
+4 fork 5
+5 sleep 500
+5 exit
+4 exit
+3 compute 500
+3 exit
+2 exit
+1 compute 500
+1 exit

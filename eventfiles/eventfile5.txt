@@ -1,0 +1,19 @@
+# big sleeps
+1 fork 2
+2 fork 3
+1 compute 1500
+2 sleep 1000
+3 sleep 500
+3 compute 1500
+2 sleep 1000
+1 sleep 2000
+3 sleep 500
+2 sleep 500
+1 compute 500
+1 sleep 500
+2 sleep 1000
+2 sleep 1000
+1 exit
+2 exit
+3 sleep 500
+3 exit
