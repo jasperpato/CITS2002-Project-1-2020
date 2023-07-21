@@ -40,3 +40,5 @@ int transfer_time = DEF_TRANSFER_TIME; // per byte
 int time_quantum = DEF_TIME_QUANTUM; // usecs
 
 int time = 0;
+
+int num_state_changes = 0;

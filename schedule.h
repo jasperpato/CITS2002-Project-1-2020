@@ -57,6 +57,8 @@ extern int time_quantum; // usecs
 
 extern int time;
 
+extern int num_state_changes;
+
 // schedule 
 
 extern void do_unblock(process **, int);

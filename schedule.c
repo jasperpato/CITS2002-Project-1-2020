@@ -46,9 +46,12 @@ void update_waiters() {
 void change_state(process *process, char *state) {
   time += switch_state_time;
   update_sleepers(switch_state_time);
-  if (process != NULL) {
-    process->state = get_state(state);
-  }
+  ++num_state_changes;
+
+  print_event(process->current_event);
+  printf("(%d) %s->%s\n\n", num_state_changes, states[process->state], state);
+  
+  process->state = get_state(state);
 }
 
 void change_state_pid(int pid, char *state) {
@@ -84,10 +87,12 @@ void schedule() {
       event->usecs -= elapsed;
       update_sleepers(elapsed);
 
+      change_state(process, "Ready");
+      
       if (event->usecs <= 0) {
         ++process->current_event;
       }
-      change_state(process, "Ready");
+
       enqueue(process);
     }
 
@@ -106,7 +111,6 @@ void schedule() {
       // parent
       enqueue(process);
       change_state(process, "Ready");
-
       ++process->current_event;
     }
 
@@ -129,10 +133,8 @@ int main(int argc, char *argv[]) {
   if (argc < 1) exit(EXIT_FAILURE);
   
   read_file(argv[1]);
-  print_processes();
-
+  
   schedule();
-  // test_blocked();
 
   exit(EXIT_SUCCESS);
   return 0;
