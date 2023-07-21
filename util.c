@@ -23,3 +23,10 @@ int get_state(char *state) {
   }
   return -1;
 }
+
+process *get_process(int pid) {
+  for (int i = 0; i < num_processes; ++i) {
+    if (pid == processes[i].pid) return &processes[i];
+  }
+  return NULL;
+}

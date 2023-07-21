@@ -24,15 +24,15 @@ char states[][MAX_ARG_LENGTH] = {
 
 int NUM_STATES = sizeof states / sizeof states[0];
 
-process processes[MAX_PROCESSES];
+process processes[MAX_PROCESSES] = {};
 int num_processes = 0;
 
-process *queue[MAX_PROCESSES];
+process *queue[MAX_PROCESSES] = {};
 int first = 0;
 int last = 0;
 
-process *sleepers[MAX_PROCESSES];
-int num_sleepers = 0;
+process *blocked[MAX_PROCESSES] = {};
+int num_blocked;
 
 int switch_state_time = DEF_SWITCH_STATE_TIME; // usecs
 int pipe_size = DEF_PIPE_SIZE; // bytes

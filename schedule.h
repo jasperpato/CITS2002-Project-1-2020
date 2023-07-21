@@ -38,7 +38,7 @@ struct process {
   event events[MAX_EVENTS];
   event *current_event;
   int num_events;
-  int sleep_length;
+  int terminated;
 } typedef process;
 
 extern process processes[MAX_PROCESSES];
@@ -46,6 +46,9 @@ extern int num_processes;
 
 extern process *queue[MAX_PROCESSES];
 extern int first, last;
+
+extern process *blocked[MAX_PROCESSES];
+extern int num_blocked;
 
 extern int switch_state_time; // usecs
 extern int pipe_size; // bytes
@@ -57,29 +60,28 @@ extern int time;
 // read file
 
 extern int get_action(char *);
-
 extern void print_event(event *);
-
 extern void print_processes(void);
-
 extern void read_file(char *);
 
 // queue
 
 extern int is_empty(void);
-
 extern void enqueue(process *);
-
 extern process *dequeue(void);
-
 extern void test_queue(void);
+
+// blocked
+
+extern void block(process *);
+extern void unblock(process *);
+extern void test_blocked(void);
 
 // util
 
 extern int min(int, int);
-
 extern int max(int, int);
 
 extern int get_action(char *);
-
 extern int get_state(char *);
+extern process *get_process(int);

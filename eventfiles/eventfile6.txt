@@ -1,0 +1,2 @@
+0 sleep 10
+0 exit
