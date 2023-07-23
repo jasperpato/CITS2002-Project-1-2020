@@ -33,7 +33,7 @@ void print_processes() {
 
 void process_line(char *line) {
   event event;
-  char delim[] = " \n";
+  char delim[] = " \t\n";
   char *arg = strtok(line, delim);
   int arg_num = 0;
   

@@ -91,7 +91,7 @@ void update_waiters() {
 void change_state(process *process, char *state) {
   time += switch_state_time;
   update_sleepers(switch_state_time);
-  update_pipes(switch_state_time);
+  // update_pipes(switch_state_time);
   ++num_state_changes;
 
   // print change state
@@ -112,7 +112,7 @@ void change_state_pid(int pid, char *state) {
 void increment_time(int elapsed) {
   time += elapsed;
   update_sleepers(elapsed);
-  update_pipes(elapsed);
+  // update_pipes(elapsed);
 }
 
 void schedule() {
@@ -133,7 +133,7 @@ void schedule() {
       time += elapsed;
       event->usecs -= elapsed;
       update_sleepers(elapsed);
-      update_pipes(elapsed);
+      // update_pipes(elapsed);
 
       change_state(process, "Ready");
       
@@ -180,14 +180,46 @@ void schedule() {
 
     // WRITE PIPE
     else if (event->action == get_action("writepipe")) {
-      change_state(process, "Writing");
-      block(process);
+      pipe *pipe = get_pipe(event->descriptor);
+
+      int written = min(min(event->bytes, pipe_size - pipe->bytes), time_quantum * transfer_speed);
+      event->bytes -= written;
+      pipe->bytes += written;
+      
+      int elapsed = written / transfer_speed;
+      time += elapsed;
+      update_sleepers(elapsed);
+      
+      if (event->bytes <= 0) {
+        ++process->current_event;
+        change_state(process, "Ready");
+      }
+      else {
+        change_state(process, "Writing");
+      }
+      enqueue(process);
     }
 
     // READ PIPE
     else if (event->action == get_action("readpipe")) {
-      change_state(process, "Reading");
-      block(process);
+      pipe *pipe = get_pipe(event->descriptor);
+
+      int read = min(min(event->bytes, pipe->bytes), time_quantum * transfer_speed);
+      event->bytes -= read;
+      pipe->bytes -= read;
+      
+      int elapsed = read / transfer_speed;
+      time += elapsed;
+      update_sleepers(elapsed);
+      
+      if (event->bytes <= 0) {
+        ++process->current_event;
+        change_state(process, "Ready");
+      }
+      else {
+        change_state(process, "Reading");
+      }
+      enqueue(process);
     }
 
     // ----- EXIT -----
@@ -202,9 +234,12 @@ void schedule() {
 int main(int argc, char *argv[]) {
   if (argc < 1) exit(EXIT_FAILURE);
   
+  if (argc > 2) time_quantum = atoi(argv[2]);
+  if (argc > 3) time_quantum = atoi(argv[3]);
+
   read_file(argv[1]);
   print_processes();
-  printf("\n");
+  printf("---\n");
   
   schedule();
 
