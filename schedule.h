@@ -6,14 +6,13 @@
 
 #define MAX_PROCESSES 20
 #define MAX_EVENTS 50 // per process
-#define MAX_PIPE_DESCRIPTORS 10 // per process
 
 #define MAX_LINE_LENGTH 100
 #define MAX_ARG_LENGTH 20
 
 #define DEF_SWITCH_STATE_TIME 5
 #define DEF_PIPE_SIZE 400
-#define DEF_TRANSFER_TIME 1
+#define DEF_TRANSFER_SPEED 1
 #define DEF_TIME_QUANTUM 1000
 
 extern char actions[][MAX_ARG_LENGTH];
@@ -50,25 +49,33 @@ extern int first, last;
 extern process *blocked[MAX_PROCESSES];
 extern int num_blocked;
 
+struct pipe {
+  int descriptor;
+  int bytes; // written and not read
+} typedef pipe;
+
+extern pipe pipes[MAX_PROCESSES * MAX_EVENTS];
+extern int num_pipes;
+
 extern int switch_state_time; // usecs
 extern int pipe_size; // bytes
-extern int transfer_time; // per byte
+extern int transfer_speed; // per byte
 extern int time_quantum; // usecs
 
 extern int time;
 
 extern int num_state_changes;
 
-// schedule 
+// schedule
 
-extern void do_unblock(process **, int);
-extern void update_sleepers(int);
-extern void update_waiters(void);
-extern void change_state(process *, char *);
-extern void change_state_pid(int, char *);
-extern void increment_time(int);
-extern void schedule(void);
-
+void do_unblock(process *[], int);
+void update_sleepers(int);
+void update_pipes(int);
+void update_waiters(void);
+void change_state(process *, char *);
+void change_state_pid(int, char *);
+void increment_time(int);
+void schedule(void);
 
 // read file
 
@@ -101,3 +108,4 @@ extern int max(int, int);
 extern int get_action(char *);
 extern int get_state(char *);
 extern process *get_process(int);
+pipe *get_pipe(int);

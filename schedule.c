@@ -27,12 +27,57 @@ void update_sleepers(int elapsed) {
   do_unblock(to_unblock, num_unblock);
 }
 
+void update_pipes(int elapsed) {
+  // simulate each usec
+  for (int j = 0; j < elapsed; ++j) {
+    process *to_unblock[MAX_PROCESSES] = {};
+    int num_unblock = 0;
+    
+    // get readers first
+    for (int i = 0; i < num_blocked; ++i) {
+      process *process = blocked[i];
+      event *event = process->current_event;
+      pipe *pipe = get_pipe(event->descriptor);
+      
+      if (process->state == get_state("Reading")) {
+        int read = min(min(event->bytes, pipe->bytes), transfer_speed);
+        event->bytes -= read;
+        pipe->bytes -= read;
+      
+        if (event->bytes <= 0) {
+          to_unblock[num_unblock++] = process;
+        }
+      }
+    }
+
+    // then writers
+    for (int i = 0; i < num_blocked; ++i) {
+      process *process = blocked[i];
+      event *event = process->current_event;
+      pipe *pipe = get_pipe(event->descriptor);
+      
+      if (process->state == get_state("Writing")) {
+        int written = min(min(event->bytes, pipe_size - pipe->bytes), transfer_speed);
+        event->bytes -= written;
+        pipe->bytes += written;
+      
+        if (event->bytes <= 0) {
+          to_unblock[num_unblock++] = process;
+        }
+      }
+    }
+    do_unblock(to_unblock, num_unblock);
+  }
+}
+
 void update_waiters() {
   process *to_unblock[MAX_PROCESSES] = {};
   int num_unblock = 0;
+
   for (int i = 0; i < num_blocked; ++i) {
     process *process = blocked[i];
       if (process->state == get_state("Waiting")) {
+        // check child process
         for (int j = 0; j < num_processes; ++j) {
           if (processes[j].pid == process->current_event->other_pid && processes[j].terminated) {
             to_unblock[num_unblock++] = process;
@@ -46,6 +91,7 @@ void update_waiters() {
 void change_state(process *process, char *state) {
   time += switch_state_time;
   update_sleepers(switch_state_time);
+  update_pipes(switch_state_time);
   ++num_state_changes;
 
   // print change state
@@ -66,6 +112,7 @@ void change_state_pid(int pid, char *state) {
 void increment_time(int elapsed) {
   time += elapsed;
   update_sleepers(elapsed);
+  update_pipes(elapsed);
 }
 
 void schedule() {
@@ -78,7 +125,6 @@ void schedule() {
 
     process *process = dequeue();
     event *event = process->current_event;
-    
     change_state(process, "Running");
 
     // ----- COMPUTE -----
@@ -87,6 +133,7 @@ void schedule() {
       time += elapsed;
       event->usecs -= elapsed;
       update_sleepers(elapsed);
+      update_pipes(elapsed);
 
       change_state(process, "Ready");
       
@@ -121,6 +168,28 @@ void schedule() {
       block(process); 
     }
 
+    // PIPE
+    else if (event->action == get_action("pipe")) {
+      pipe p = { .descriptor = event->descriptor, .bytes = 0 };
+      pipes[num_pipes++] = p;
+
+      enqueue(process);
+      change_state(process, "Ready");
+      ++process->current_event;
+    }
+
+    // WRITE PIPE
+    else if (event->action == get_action("writepipe")) {
+      change_state(process, "Writing");
+      block(process);
+    }
+
+    // READ PIPE
+    else if (event->action == get_action("readpipe")) {
+      change_state(process, "Reading");
+      block(process);
+    }
+
     // ----- EXIT -----
     if (event->action == get_action("exit")) {
       process->terminated = 1;
@@ -134,6 +203,8 @@ int main(int argc, char *argv[]) {
   if (argc < 1) exit(EXIT_FAILURE);
   
   read_file(argv[1]);
+  print_processes();
+  printf("\n");
   
   schedule();
 

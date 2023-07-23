@@ -1,0 +1,5 @@
+1 fork 2
+1 sleep 10
+2 sleep 10
+1 exit
+2 exit

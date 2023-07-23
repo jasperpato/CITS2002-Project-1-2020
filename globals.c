@@ -34,9 +34,12 @@ int last = 0;
 process *blocked[MAX_PROCESSES] = {};
 int num_blocked;
 
+pipe pipes[MAX_PROCESSES * MAX_EVENTS] = {};
+int num_pipes = 0;
+
 int switch_state_time = DEF_SWITCH_STATE_TIME; // usecs
 int pipe_size = DEF_PIPE_SIZE; // bytes
-int transfer_time = DEF_TRANSFER_TIME; // per byte
+int transfer_speed = DEF_TRANSFER_SPEED; // bytes per usec
 int time_quantum = DEF_TIME_QUANTUM; // usecs
 
 int time = 0;

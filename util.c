@@ -30,3 +30,12 @@ process *get_process(int pid) {
   }
   return NULL;
 }
+
+pipe *get_pipe(int descriptor) {
+  for (int i = 0; i < num_pipes; ++i) {
+    if (pipes[i].descriptor == descriptor) {
+      return &pipes[i];
+    }
+  }
+  return NULL;
+}

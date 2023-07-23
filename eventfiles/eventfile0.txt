@@ -5,7 +5,7 @@
 2 readpipe 4 400
 1 writepipe 4 1200
 2 readpipe 4 400
-1 wait 18
+1 wait 2
 2 readpipe 4 400
 2 exit
 1 exit
