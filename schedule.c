@@ -27,49 +27,6 @@ void update_sleepers(int elapsed) {
   do_unblock(to_unblock, num_unblock);
 }
 
-void update_pipes(int elapsed) {
-  // simulate each usec
-  for (int j = 0; j < elapsed; ++j) {
-    process *to_unblock[MAX_PROCESSES] = {};
-    int num_unblock = 0;
-    
-    // get readers first
-    for (int i = 0; i < num_blocked; ++i) {
-      process *process = blocked[i];
-      event *event = process->current_event;
-      pipe *pipe = get_pipe(event->descriptor);
-      
-      if (process->state == get_state("Reading")) {
-        int read = min(min(event->bytes, pipe->bytes), transfer_speed);
-        event->bytes -= read;
-        pipe->bytes -= read;
-      
-        if (event->bytes <= 0) {
-          to_unblock[num_unblock++] = process;
-        }
-      }
-    }
-
-    // then writers
-    for (int i = 0; i < num_blocked; ++i) {
-      process *process = blocked[i];
-      event *event = process->current_event;
-      pipe *pipe = get_pipe(event->descriptor);
-      
-      if (process->state == get_state("Writing")) {
-        int written = min(min(event->bytes, pipe_size - pipe->bytes), transfer_speed);
-        event->bytes -= written;
-        pipe->bytes += written;
-      
-        if (event->bytes <= 0) {
-          to_unblock[num_unblock++] = process;
-        }
-      }
-    }
-    do_unblock(to_unblock, num_unblock);
-  }
-}
-
 void update_waiters() {
   process *to_unblock[MAX_PROCESSES] = {};
   int num_unblock = 0;
